@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, withDefaults } from "vue";
+import { computed, withDefaults, useListeners } from "vue";
 import { cva, type VariantProps } from "class-variance-authority";
 import { className } from "@/utils/className.util";
 
@@ -46,6 +46,8 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   size: "default",
 });
 
+const listeners = useListeners();
+
 const buttonClass = computed(() => {
   return className(
     buttonVariants({
@@ -59,7 +61,7 @@ const Component = computed(() => (props.asChild ? "slot" : "button"));
 </script>
 
 <template>
-  <component :is="Component" :class="buttonClass">
+  <component :is="Component" :class="buttonClass" v-on="listeners">
     <slot />
   </component>
 </template>

@@ -42,6 +42,7 @@ export interface RedditApiResponse {
 export interface PostState {
   isRead: boolean;
   isDismissed: boolean;
+  isDismissing?: boolean;
 }
 
 export interface RedditStoreState {

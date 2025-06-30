@@ -32,8 +32,24 @@ export const useRedditStore = defineStore("reddit", {
       (state) =>
       (postId: string): PostState => {
         return (
-          state.postStates[postId] || { isRead: false, isDismissed: false }
+          state.postStates[postId] || {
+            isRead: false,
+            isDismissed: false,
+            isDismissing: false,
+          }
         );
+      },
+
+    isPostDismissed:
+      (state) =>
+      (postId: string): boolean => {
+        return !!state.postStates[postId]?.isDismissed;
+      },
+
+    isPostDismissing:
+      (state) =>
+      (postId: string): boolean => {
+        return !!state.postStates[postId]?.isDismissing;
       },
   },
 
@@ -47,14 +63,22 @@ export const useRedditStore = defineStore("reddit", {
     },
 
     setPostState(postId: string, stateUpdate: Partial<PostState>) {
-      if (!this.postStates[postId]) {
-        this.postStates[postId] = { isRead: false, isDismissed: false };
+      const updatedPostStates = { ...this.postStates };
+
+      if (!updatedPostStates[postId]) {
+        updatedPostStates[postId] = {
+          isRead: false,
+          isDismissed: false,
+          isDismissing: false,
+        };
       }
 
-      this.postStates[postId] = {
-        ...this.postStates[postId],
+      updatedPostStates[postId] = {
+        ...updatedPostStates[postId],
         ...stateUpdate,
       };
+
+      this.postStates = updatedPostStates;
     },
 
     setSelectedPost(post: RedditPost | null) {
@@ -80,7 +104,11 @@ export const useRedditStore = defineStore("reddit", {
     initializePostStates(posts: RedditPost[]) {
       posts.forEach((post) => {
         if (!this.postStates[post.id]) {
-          this.postStates[post.id] = { isRead: false, isDismissed: false };
+          this.postStates[post.id] = {
+            isRead: false,
+            isDismissed: false,
+            isDismissing: false,
+          };
         }
       });
     },
@@ -90,7 +118,11 @@ export const useRedditStore = defineStore("reddit", {
 
       posts.forEach((post) => {
         if (!updatedPostStates[post.id]) {
-          updatedPostStates[post.id] = { isRead: false, isDismissed: false };
+          updatedPostStates[post.id] = {
+            isRead: false,
+            isDismissed: false,
+            isDismissing: false,
+          };
         }
 
         updatedPostStates[post.id] = {
@@ -118,7 +150,7 @@ export const useRedditStore = defineStore("reddit", {
 
       try {
         const response = await RedditService.getTopPosts(
-          25,
+          50,
           loadMore ? this.after : null
         );
         const posts = response.data.children.map((child) => child.data);
@@ -142,6 +174,11 @@ export const useRedditStore = defineStore("reddit", {
 
     markAsRead(postId: string) {
       this.setPostState(postId, { isRead: true });
+      this.saveState();
+    },
+
+    markAsDismissing(postId: string) {
+      this.setPostState(postId, { isDismissing: true });
       this.saveState();
     },
 

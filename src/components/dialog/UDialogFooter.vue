@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { useListeners } from "vue";
 import { className } from "@/utils/className.util";
-
-const listeners = useListeners();
 </script>
 
 <template>
   <div
     :class="
       className(
-        'rounded-lg border bg-card text-card-foreground shadow-sm',
+        'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
         $attrs.class
       )
     "
-    v-on="listeners"
   >
     <slot />
   </div>
