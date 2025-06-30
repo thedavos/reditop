@@ -7,6 +7,7 @@ import { useRedditStore } from "@/stores/reddit.store";
 import UButton from "@/components/UButton.vue";
 import UBadge from "@/components/UBadge.vue";
 import UPostItem from "@/components/posts/UPostItem.vue";
+import UPagination from "@/components/UPagination.vue";
 import URedditError from "@/components/URedditError.vue";
 import { useNotifications } from "@/composables/useNotifications.composable";
 import type { RedditPost } from "@/types/reddit";
@@ -25,6 +26,9 @@ const {
   error,
   selectedPost,
   isPostDismissing,
+  paginatedPosts,
+  totalPages,
+  currentPage,
 } = storeToRefs(redditStore);
 
 redditStore.loadPosts();
@@ -150,16 +154,16 @@ const selectPost = (postId: string) => {
                 <p class="text-muted-foreground">Cargando publicaciones</p>
               </div>
               <div
-                v-else-if="visiblePosts.length === 0"
+                v-else-if="paginatedPosts.length === 0"
                 class="text-center py-8"
               >
                 <p class="text-muted-foreground">
                   No hay publicaciones para mostrar
                 </p>
               </div>
-              <template v-else-if="visiblePosts.length > 0">
+              <template v-else-if="paginatedPosts.length > 0">
                 <u-post-item
-                  v-for="post in visiblePosts"
+                  v-for="post in paginatedPosts"
                   :key="post.id"
                   :post="post"
                   :post-state="postStates[post.id]"
@@ -172,6 +176,14 @@ const selectPost = (postId: string) => {
                   @dismiss="dismissPost"
                 />
               </template>
+            </div>
+
+            <div v-if="totalPages > 1" class="border-t p-4">
+              <UPagination
+                :current-page="currentPage"
+                :total-pages="totalPages"
+                @page-change="redditStore.setCurrentPage"
+              />
             </div>
           </div>
         </aside>

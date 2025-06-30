@@ -49,6 +49,7 @@ export interface RedditStoreState {
   posts: RedditPost[];
   postStates: Record<string, PostState>;
   selectedPost: RedditPost | null;
+  currentPage: number;
   after: string | null;
   loading: boolean;
   error: string | null;

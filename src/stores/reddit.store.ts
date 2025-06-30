@@ -3,12 +3,14 @@ import type { PostState, RedditPost, RedditStoreState } from "@/types/reddit";
 import { RedditService } from "@/services/reddit.api";
 
 const STORAGE_KEY = "reddit-client-state";
+const POSTS_PER_PAGE = 10;
 
 export const useRedditStore = defineStore("reddit", {
   state: (): RedditStoreState => ({
     posts: [],
     postStates: {},
     selectedPost: null,
+    currentPage: 1,
     after: null,
     error: null,
     loading: false,
@@ -39,6 +41,17 @@ export const useRedditStore = defineStore("reddit", {
           }
         );
       },
+
+    paginatedPosts(): RedditPost[] {
+      const startIndex = (this.currentPage - 1) * POSTS_PER_PAGE;
+      const endIndex = startIndex + POSTS_PER_PAGE;
+
+      return this.visiblePosts.slice(startIndex, endIndex);
+    },
+
+    totalPages(): number {
+      return Math.ceil(this.visiblePosts.length / POSTS_PER_PAGE);
+    },
 
     isPostDismissed:
       (state) =>
@@ -95,6 +108,10 @@ export const useRedditStore = defineStore("reddit", {
 
     setError(error: string | null) {
       this.error = error;
+    },
+
+    setCurrentPage(page: number) {
+      this.currentPage = page;
     },
 
     setIsMobile(isMobile: boolean) {

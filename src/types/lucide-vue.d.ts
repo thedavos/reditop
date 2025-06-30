@@ -8,6 +8,8 @@ declare module "lucide-vue" {
   export const User: Component;
   export const Clock: Component;
   export const ArrowUp: Component;
+  export const ArrowLeft: Component;
+  export const ArrowRight: Component;
   export const MessageSquare: Component;
   export const ImageOff: Component;
 
