@@ -113,39 +113,84 @@ yarn lint
 
 ## Decisiones de Diseño y Arquitectura
 
-Esta sección destaca algunas de las decisiones clave tomadas durante el desarrollo de Reditop y notas importantes sobre su funcionamiento.
+Esta sección documenta las decisiones técnicas clave y consideraciones arquitecturales que dieron forma a Reditop, proporcionando contexto sobre las elecciones tecnológicas y patrones de diseño implementados.
 
-### Decisiones Clave Tomadas
+### Stack Tecnológico y Decisiones Fundamentales
+#### Frontend Framework y Ecosistema
+**Vue.js 2** fue seleccionado como framework principal según los requerimientos del reto técnico para un puesto de Frontend Developer. Esta elección permite demostrar habilidades específicas en el ecosistema Vue 2, incluyendo el manejo de sus particularidades y limitaciones en comparación con Vue 3.
 
-*   **Framework y Ecosistema Vue.js 2:**
-    *   Se utilizó Vue.js 2 como framework principal. Aunque el template inicial de Vite pudo sugerir Vue 3, el proyecto se desarrolló consistentemente con Vue 2.
-    *   **Pinia** fue elegido para la gestión del estado global. Es la solución recomendada actualmente para aplicaciones Vue, ofreciendo una API intuitiva y excelente integración con TypeScript.
-    *   **Vue Router** se incluyó para la gestión de rutas, aunque la aplicación actual es de una sola página principal, la base está para futuras expansiones.
-*   **Persistencia de Datos con `localStorage`:**
-    *   Para mejorar la experiencia del usuario, el estado de los posts (cargados, leídos, descartados) y el post actualmente seleccionado se guardan en `localStorage`. Esto permite que las preferencias y el estado de la aplicación persistan entre sesiones de navegación.
-*   **Diseño Responsivo con Tailwind CSS:**
-    *   Se optó por Tailwind CSS para un desarrollo ágil de la interfaz de usuario y para asegurar un diseño responsivo que se adapte correctamente a dispositivos móviles y de escritorio.
-*   **Componentes Reutilizables y Lógica Centralizada:**
-    *   Se crearon componentes de UI genéricos (ej. `UButton`, `UBadge`, `UCard`) y específicos (`UPostItem`, `UPostDetail`).
-    *   La lógica para componentes complejos como los diálogos se centralizó en composables (ej. `useDialog` para `UImageDialog`), promoviendo la reutilización de código y la mantenibilidad.
-*   **TypeScript para Robustez:**
-    *   El proyecto utiliza TypeScript para aprovechar el tipado estático, lo que ayuda a prevenir errores comunes en tiempo de desarrollo y mejora la mantenibilidad y comprensión del código a largo plazo.
-*   **Experiencia de Usuario (UX):**
-    *   Se implementaron notificaciones para feedback inmediato de las acciones del usuario.
-    *   La paginación se maneja del lado del cliente para una navegación rápida una vez que los posts iniciales son cargados, con opción de cargar más posts bajo demanda.
-    *   Se incluyó funcionalidad para descartar posts y descargar imágenes, añadiendo valor práctico para el usuario.
+La gestión del estado se implementó con **Pinia**, la solución oficialmente recomendada que ofrece una API intuitiva, excelente integración con TypeScript y mejor experiencia de desarrollo comparada con Vuex. **Vue Router** se integró desde el inicio para establecer una base escalable, anticipando futuras expansiones hacia una aplicación multi-página.
 
-### Notas Importantes sobre el Funcionamiento
+#### Persistencia y Experiencia de Usuario
 
-*   **Fuente de Datos:** La aplicación obtiene los posts más populares (`top`) del subreddit `r/all` de Reddit. Esto implica una amplia variedad de contenido.
-*   **Carga y Paginación de Posts:**
-    *   Inicialmente, se cargan 50 posts de la API de Reddit.
-    *   La paginación (10 posts por página) se realiza en el lado del cliente sobre los posts ya cargados. El store (`reddit.store.ts`) gestiona la lógica para cargar más lotes de 50 posts si el usuario llega al final de los datos disponibles.
-*   **Interacciones y Estado Local:**
-    *   Las acciones como marcar un post como leído (al seleccionarlo) o descartarlo modifican el estado local y este estado se persiste en `localStorage`. No se envían cambios de estado de vuelta a Reddit.
-*   **Manejo de Errores:** Existe un manejo básico de errores para cuando falla la comunicación con la API de Reddit, mostrando un mensaje al usuario y permitiendo reintentar la carga.
-*   **Despliegue y Dominio:** El commit `Create CNAME` y la URL proporcionada (`https://reditop.online/`) indican que el proyecto está configurado para ser desplegado, probablemente en una plataforma como GitHub Pages, utilizando un dominio personalizado.
-*   **Configuración de Build:** Se han realizado ajustes en la configuración de compilación para optimizar para navegadores modernos y mejorar la seguridad de tipos (commit `ad202e3`).
+La persistencia del estado se logra mediante <code>localStorage</code>, almacenando:
+
+- Estado de los posts (cargados, leídos, descartados)
+- Post actualmente seleccionado
+
+Esta decisión mejora significativamente la experiencia del usuario al mantener el contexto entre sesiones de navegación sin requerir infraestructura backend adicional.
+
+#### Arquitectura de Estilos y Responsividad
+
+**Tailwind CSS** fue elegido por su enfoque utility-first que permite:
+
+- Desarrollo ágil de interfaces
+- Consistencia visual a través de un sistema de diseño unificado
+- Optimización automática del CSS final
+- Responsividad nativa con breakpoints predefinidos
+
+### Patrones de Diseño y Organización del Código
+#### Arquitectura de Componentes
+La estructura de componentes sigue un patrón jerárquico bien definido:
+
+**Componentes Base (UI Kit):** `UButton`, `UBadge`, `UCard` - Elementos reutilizables que forman el sistema de diseño básico, manteniendo consistencia visual y comportamental. La creación de estos componentes propios fue necesaria debido a que las principales librerías de componentes UI (como Vuetify, Quasar, Element Plus) han discontinuado el soporte para Vue.js 2, enfocándose exclusivamente en Vue 3.
+
+**Componentes Específicos:** `UPostItem`, `UPostDetail` - Componentes especializados para el dominio de la aplicación, encapsulando lógica de negocio específica.
+
+**Composables para Lógica Compartida:** La lógica compleja, como el manejo de diálogos (`useDialog` para `UImageDialog`), se abstrajo en composables reutilizables, promoviendo la separación de responsabilidades y la testabilidad del código.
+
+#### Tipado Estático y Robustez
+
+**TypeScript** se implementó para:
+
+- Detección temprana de errores en tiempo de desarrollo
+- Mejor IntelliSense y experiencia de desarrollo
+- Documentación implícita del código a través de tipos
+- Facilitar el mantenimiento y refactoring a largo plazo
+
+### Estrategia de Datos y Rendimiento
+
+#### Gestión de Estado y API
+
+La aplicación consume la API pública de Reddit para obtener los posts más populares de r/all, implementando una estrategia híbrida de carga y paginación:
+
+**Carga Inicial:** 50 posts se obtienen en la primera petición para proporcionar contenido inmediato.
+
+**Paginación Cliente-Servidor:** Se usa la paginación del lado del cliente (10 posts por página) sobre datos ya cargados para navegación instantánea
+
+#### Optimizaciones de UX
+
+- **Feedback Inmediato:** Sistema de notificaciones para todas las acciones del usuario
+- **Estados Locales:** Las interacciones (marcar como leído, descartar) se reflejan inmediatamente en la UI
+- **Gestión de Errores:** Manejo robusto de fallos de red con opciones de reintento
+- **Funcionalidades Prácticas:** Descarga de imágenes y gestión de posts descartados
+
+### Consideraciones de Despliegue y Configuración
+
+#### Optimizaciones de Build
+
+La configuración de compilación se optimizó para:
+
+- Compatibilidad con navegadores modernos
+- Seguridad de tipos mejorada
+- Optimización del bundle final
+
+### Infraestructura de Despliegue
+El proyecto está configurado para despliegue en GitHub Pages con dominio personalizado (`reditop.online`), proporcionando:
+
+- Hosting estático eficiente con Github Pages
+- SSL/TLS automático
+- CDN global para mejor rendimiento
 
 ## Bitácora de Tiempo
 
