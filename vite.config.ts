@@ -9,13 +9,20 @@ export default defineConfig({
   plugins: [
     vue2(),
     legacy({
-      targets: ["ie >= 11"],
-      additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
+      targets: ["chrome >= 91", "firefox >= 88", "safari >= 15", "edge >= 91"],
+      modernPolyfills: true,
+      renderLegacyChunks: false,
     }),
   ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
+  },
+  build: {
+    target: "es2022",
+  },
+  esbuild: {
+    target: "es2022",
   },
 });

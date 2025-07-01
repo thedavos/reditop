@@ -24,8 +24,7 @@ const isImageBroken = ref(false);
 
 const isRead = computed(() => !!props.postState?.isRead);
 const thumbnail = computed(() => getThumbnailUrl(props.post));
-
-const fullImageUrl = computed(() => getImageUrl(props.post));
+const fullImageUrl = computed(() => getImageUrl(props.post) as string);
 
 const imageAlt = computed(() => {
   return props.post.title || "Imagen del post";
