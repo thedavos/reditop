@@ -111,6 +111,42 @@ npm run lint
 yarn lint
 ```
 
+## Decisiones de Diseño y Arquitectura
+
+Esta sección destaca algunas de las decisiones clave tomadas durante el desarrollo de Reditop y notas importantes sobre su funcionamiento.
+
+### Decisiones Clave Tomadas
+
+*   **Framework y Ecosistema Vue.js 2:**
+    *   Se utilizó Vue.js 2 como framework principal. Aunque el template inicial de Vite pudo sugerir Vue 3, el proyecto se desarrolló consistentemente con Vue 2.
+    *   **Pinia** fue elegido para la gestión del estado global. Es la solución recomendada actualmente para aplicaciones Vue, ofreciendo una API intuitiva y excelente integración con TypeScript.
+    *   **Vue Router** se incluyó para la gestión de rutas, aunque la aplicación actual es de una sola página principal, la base está para futuras expansiones.
+*   **Persistencia de Datos con `localStorage`:**
+    *   Para mejorar la experiencia del usuario, el estado de los posts (cargados, leídos, descartados) y el post actualmente seleccionado se guardan en `localStorage`. Esto permite que las preferencias y el estado de la aplicación persistan entre sesiones de navegación.
+*   **Diseño Responsivo con Tailwind CSS:**
+    *   Se optó por Tailwind CSS para un desarrollo ágil de la interfaz de usuario y para asegurar un diseño responsivo que se adapte correctamente a dispositivos móviles y de escritorio.
+*   **Componentes Reutilizables y Lógica Centralizada:**
+    *   Se crearon componentes de UI genéricos (ej. `UButton`, `UBadge`, `UCard`) y específicos (`UPostItem`, `UPostDetail`).
+    *   La lógica para componentes complejos como los diálogos se centralizó en composables (ej. `useDialog` para `UImageDialog`), promoviendo la reutilización de código y la mantenibilidad.
+*   **TypeScript para Robustez:**
+    *   El proyecto utiliza TypeScript para aprovechar el tipado estático, lo que ayuda a prevenir errores comunes en tiempo de desarrollo y mejora la mantenibilidad y comprensión del código a largo plazo.
+*   **Experiencia de Usuario (UX):**
+    *   Se implementaron notificaciones para feedback inmediato de las acciones del usuario.
+    *   La paginación se maneja del lado del cliente para una navegación rápida una vez que los posts iniciales son cargados, con opción de cargar más posts bajo demanda.
+    *   Se incluyó funcionalidad para descartar posts y descargar imágenes, añadiendo valor práctico para el usuario.
+
+### Notas Importantes sobre el Funcionamiento
+
+*   **Fuente de Datos:** La aplicación obtiene los posts más populares (`top`) del subreddit `r/all` de Reddit. Esto implica una amplia variedad de contenido.
+*   **Carga y Paginación de Posts:**
+    *   Inicialmente, se cargan 50 posts de la API de Reddit.
+    *   La paginación (10 posts por página) se realiza en el lado del cliente sobre los posts ya cargados. El store (`reddit.store.ts`) gestiona la lógica para cargar más lotes de 50 posts si el usuario llega al final de los datos disponibles.
+*   **Interacciones y Estado Local:**
+    *   Las acciones como marcar un post como leído (al seleccionarlo) o descartarlo modifican el estado local y este estado se persiste en `localStorage`. No se envían cambios de estado de vuelta a Reddit.
+*   **Manejo de Errores:** Existe un manejo básico de errores para cuando falla la comunicación con la API de Reddit, mostrando un mensaje al usuario y permitiendo reintentar la carga.
+*   **Despliegue y Dominio:** El commit `Create CNAME` y la URL proporcionada (`https://reditop.online/`) indican que el proyecto está configurado para ser desplegado, probablemente en una plataforma como GitHub Pages, utilizando un dominio personalizado.
+*   **Configuración de Build:** Se han realizado ajustes en la configuración de compilación para optimizar para navegadores modernos y mejorar la seguridad de tipos (commit `ad202e3`).
+
 ## Bitácora de Tiempo
 
 Para un análisis del tiempo invertido basado en el historial de commits del repositorio, por favor consulta el archivo [BITACORA.md](BITACORA.md).
