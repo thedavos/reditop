@@ -113,13 +113,13 @@ const selectPost = (postId: string) => {
             >
               <RefreshCw
                 :class="[
-                  'h-4 w-4 mr-2',
+                  'h-4 w-4',
                   {
                     'animate-spin': loading,
                   },
                 ]"
               />
-              Actualizar
+              <span class="ml-2 hidden md:block">Actualizar</span>
             </UButton>
 
             <UButton
@@ -128,8 +128,8 @@ const selectPost = (postId: string) => {
               :disabled="visiblePosts.length === 0 || isDismissingAll"
               @click="dismissAll"
             >
-              <Trash2 class="h-4 w-4 mr-2" />
-              Descartar todo
+              <Trash2 class="h-4 w-4" />
+              <span class="ml-2 hidden md:block">Descartar todo</span>
             </UButton>
           </div>
         </div>

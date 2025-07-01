@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { inject } from "vue";
-import { DialogRootKey, type DialogContext } from "@/components/dialog/keys";
+import { useDialogContext } from "@/components/dialog/useDialog";
 
-const dialogContext = inject(DialogRootKey) as DialogContext;
-const { closeDialog } = dialogContext;
+const { closeDialog } = useDialogContext();
+
+const close = () => {
+  console.log("Closing Dialog");
+  closeDialog();
+};
 </script>
 
 <template>
-  <div @click="closeDialog">
+  <div class="contents" @click="close()">
     <slot />
   </div>
 </template>

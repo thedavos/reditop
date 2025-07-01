@@ -3,11 +3,12 @@ import { computed, ref } from "vue";
 import { X, User, Clock, ArrowUp, MessageSquare, ImageOff } from "lucide-vue";
 import { UCard } from "@/components/card";
 import UButton from "@/components/UButton.vue";
+import UBadge from "@/components/UBadge.vue";
+import UImageDialog from "@/components/UImageDialog.vue";
 import { formatRelativeTime } from "@/utils/date.util";
 import { formatNumber } from "@/utils/formatNumber.util";
 import { getThumbnailUrl } from "@/utils/thumbnail.util";
 import type { PostState, RedditPost } from "@/types/reddit";
-import UBadge from "@/components/UBadge.vue";
 
 interface PostItemProps {
   post: RedditPost;
@@ -22,6 +23,33 @@ const isImageBroken = ref(false);
 
 const isRead = computed(() => !!props.postState?.isRead);
 const thumbnail = computed(() => getThumbnailUrl(props.post));
+
+const fullImageUrl = computed(() => {
+  if (
+    props.post.url &&
+    (props.post.url.includes(".jpg") ||
+      props.post.url.includes(".png") ||
+      props.post.url.includes(".gif"))
+  ) {
+    return props.post.url;
+  }
+
+  if (props.post.preview?.images?.[0]?.source?.url) {
+    return props.post.preview.images[0].source.url.replace(/&amp;/g, "&");
+  }
+
+  return "";
+});
+
+const imageAlt = computed(() => {
+  return props.post.title || "Imagen del post";
+});
+
+const downloadFilename = computed(() => {
+  return `reddit-${props.post.id}-${props.post.title
+    .substring(0, 50)
+    .replace(/[^\w\s]/gi, "")}.jpg`;
+});
 
 const onThumbnailError = () => {
   isImageBroken.value = true;
@@ -46,13 +74,19 @@ const onDismiss = (e: Event) => {
   >
     <div class="flex gap-4">
       <div class="flex-shrink-0">
-        <img
+        <UImageDialog
           v-if="thumbnail && !isImageBroken"
-          :src="thumbnail"
-          alt="Thumbnail"
-          class="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-          @error="onThumbnailError"
-        />
+          :image-url="fullImageUrl"
+          :image-alt="imageAlt"
+          :download-filename="downloadFilename"
+        >
+          <img
+            :src="thumbnail"
+            :alt="`Thumbnail: ${imageAlt}`"
+            class="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity border"
+            @error="onThumbnailError"
+          />
+        </UImageDialog>
         <ImageOff v-else class="h-16 w-16 text-muted-foreground" />
       </div>
       <div class="flex-1 min-w-0">

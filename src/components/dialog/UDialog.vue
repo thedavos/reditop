@@ -1,22 +1,7 @@
 <script setup lang="ts">
-import { provide, ref } from "vue";
-import { DialogRootKey } from "@/components/dialog/keys";
+import { useDialog } from "@/components/dialog/useDialog";
 
-const isOpen = ref(false);
-
-const openDialog = () => {
-  isOpen.value = true;
-};
-
-const closeDialog = () => {
-  isOpen.value = false;
-};
-
-provide(DialogRootKey, {
-  isOpen,
-  openDialog,
-  closeDialog,
-});
+useDialog();
 </script>
 
 <template>

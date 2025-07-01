@@ -3,7 +3,8 @@ import { className } from "@/utils/className.util";
 </script>
 
 <template>
-  <div
+  <h2
+    id="dialog-title"
     :class="
       className(
         'text-lg font-semibold leading-none tracking-tight',
@@ -12,5 +13,5 @@ import { className } from "@/utils/className.util";
     "
   >
     <slot />
-  </div>
+  </h2>
 </template>

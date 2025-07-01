@@ -6,7 +6,7 @@ import { className } from "@/utils/className.util";
   <div
     :class="
       className(
-        'flex flex-col space-y-1.5 text-center sm:text-left',
+        'flex flex-col space-y-1.5 text-left lg:text-center',
         $attrs.class
       )
     "

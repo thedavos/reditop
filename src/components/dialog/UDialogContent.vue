@@ -1,24 +1,42 @@
 <script setup lang="ts">
-import { inject, onUnmounted, watch, computed } from "vue";
-import { X } from "lucide-vue";
+import { onUnmounted, watch, computed, nextTick, ref } from "vue";
 import { Portal } from "portal-vue";
 import { className } from "@/utils/className.util";
-import UDialogClose from "@/components/dialog/UDialogClose.vue";
-import { type DialogContext, DialogRootKey } from "@/components/dialog/keys";
+import { useDialogContext, useDialog } from "@/components/dialog/useDialog";
 
 const props = defineProps<{
   classes?: string;
 }>();
 
-const dialogContext = inject(DialogRootKey) as DialogContext;
-const { isOpen, closeDialog } = dialogContext;
+useDialog();
+const { isOpen, closeDialog } = useDialogContext();
+
+const isVisible = ref(false);
+const isAnimating = ref(false);
 
 const classes = computed(() =>
   className(
-    "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+    // Mobile: bottom sheet positioning
+    "fixed bottom-0 left-0 right-0 z-50 grid w-full gap-4 border bg-background p-6 shadow-lg rounded-t-lg",
+    // Desktop: centered dialog
+    "sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto sm:max-w-xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg",
+    // Animation classes
+    "transition-all duration-300 ease-out",
+    isAnimating.value
+      ? "opacity-100 translate-y-0 sm:scale-100"
+      : "opacity-0 translate-y-full sm:translate-y-4 sm:scale-95",
     props.classes
   )
 );
+
+const backdropClasses = computed(() =>
+  className(
+    "fixed inset-0 z-50 bg-black/50 transition-opacity duration-300",
+    isAnimating.value ? "opacity-100" : "opacity-0"
+  )
+);
+
+let previousActiveElement: HTMLElement | null = null;
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === "Escape" && isOpen.value) {
@@ -26,63 +44,81 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 };
 
-watch(isOpen, (newValue) => {
+const handleBackdropClick = (e: Event) => {
+  if (e.target === e.currentTarget) {
+    closeDialog();
+  }
+};
+
+const focusDialog = async () => {
+  await nextTick();
+  const dialog = document.querySelector('[role="dialog"]') as HTMLElement;
+  if (dialog) {
+    dialog.focus();
+  }
+};
+
+const restoreFocus = () => {
+  if (previousActiveElement) {
+    previousActiveElement.focus();
+    previousActiveElement = null;
+  }
+};
+
+const cleanupDialog = () => {
+  document.body.style.overflow = "";
+  document.removeEventListener("keydown", handleKeydown);
+  restoreFocus();
+  isVisible.value = false;
+};
+
+watch(isOpen, async (newValue) => {
   if (newValue) {
-    document.addEventListener("keydown", handleKeydown);
+    previousActiveElement = document.activeElement as HTMLElement;
+
     document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeydown);
+
+    isVisible.value = true;
+    await nextTick();
+
+    setTimeout(() => {
+      isAnimating.value = true;
+    }, 10);
+
+    await focusDialog();
   } else {
-    document.removeEventListener("keydown", handleKeydown);
-    document.body.style.overflow = "";
+    isAnimating.value = false;
+
+    setTimeout(() => {
+      cleanupDialog();
+    }, 300);
   }
 });
 
 onUnmounted(() => {
   document.removeEventListener("keydown", handleKeydown);
   document.body.style.overflow = "";
+  restoreFocus();
 });
 </script>
 
 <template>
   <Portal to="body">
-    <Transition
-      enter-from-class="opacity-0"
-      enter-active-class="transition-opacity duration-300 ease-out"
-      enter-to-class="opacity-100"
-      leave-from-class="opacity-100"
-      leave-active-class="transition-opacity duration-200 ease-in"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="isOpen"
-        class="fixed inset-0 z-50 bg-black/50"
-        @click="closeDialog"
-      />
-    </Transition>
+    <div v-if="isVisible">
+      <div :class="backdropClasses" @click="handleBackdropClick" />
 
-    <Transition
-      enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-to-class="opacity-100 translate-y-0 sm:scale-100"
-      leave-from-class="opacity-100 translate-y-0 sm:scale-100"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-    >
       <div
-        v-if="isOpen"
-        v-bind="$attrs"
+        v-bind="$attrs.class"
         :class="classes"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-description"
+        tabindex="-1"
       >
-        <slot />
-
-        <UDialogClose
-          class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        >
-          <X class="h-4 w-4" />
-          <span class="sr-only">Close</span>
-        </UDialogClose>
+        <slot :isOpen="isOpen" :closeDialog="closeDialog" />
       </div>
-    </Transition>
+    </div>
   </Portal>
 </template>

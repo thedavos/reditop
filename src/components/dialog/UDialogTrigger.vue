@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { inject } from "vue";
-import { DialogRootKey, type DialogContext } from "@/components/dialog/keys";
+import { useDialogContext } from "@/components/dialog/useDialog";
 
-const dialogContext = inject(DialogRootKey) as DialogContext;
-const { openDialog } = dialogContext;
+const { openDialog } = useDialogContext();
 </script>
 
 <template>
-  <div @click="openDialog">
+  <div class="contents" @click="openDialog">
     <slot />
   </div>
 </template>

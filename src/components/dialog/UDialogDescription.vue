@@ -3,9 +3,10 @@ import { className } from "@/utils/className.util";
 </script>
 
 <template>
-  <div :class="className('text-sm text-muted-foreground', $attrs.class)">
+  <p
+    id="dialog-description"
+    :class="className('text-sm text-muted-foreground', $attrs.class)"
+  >
     <slot />
-  </div>
+  </p>
 </template>
-
-<style scoped></style>

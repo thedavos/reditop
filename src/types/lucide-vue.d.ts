@@ -12,6 +12,7 @@ declare module "lucide-vue" {
   export const ArrowRight: Component;
   export const MessageSquare: Component;
   export const ImageOff: Component;
+  export const Download: Component;
 
   const lucide: Record<string, Component>;
   export default lucide;
