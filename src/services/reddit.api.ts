@@ -1,7 +1,7 @@
 import type { RedditApiResponse } from "@/types/reddit";
 import axios from "axios";
 
-const REDDIT_API_BASE = "https://api.reddit.com";
+const REDDIT_API_BASE = "https://cors-anywhere.com/https://api.reddit.com";
 
 export class RedditService {
   static async getTopPosts(
