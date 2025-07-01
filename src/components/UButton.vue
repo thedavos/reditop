@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, withDefaults, useListeners } from "vue";
+import { computed, useListeners } from "vue";
 import { cva, type VariantProps } from "class-variance-authority";
 import { className } from "@/utils/className.util";
 
@@ -41,22 +41,17 @@ interface ButtonProps {
   classes?: string;
 }
 
-const props = withDefaults(defineProps<ButtonProps>(), {
-  asChild: false,
-  variant: "default",
-  size: "default",
-  classes: "",
-});
+const props = defineProps<ButtonProps>();
 
 const listeners = useListeners();
 
 const buttonClass = computed(() => {
   return className(
     buttonVariants({
-      variant: props.variant,
-      size: props.size,
+      variant: props.variant || "default",
+      size: props.size || "default",
     }),
-    props.classes
+    props.classes || ""
   );
 });
 

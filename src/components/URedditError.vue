@@ -35,7 +35,7 @@ const refreshShortcut = isMac ? "⇧⌘R" : "Ctrl+Shift+R";
         </div>
 
         <UButton @click="emit('refresh')" class="w-full">
-          <RefreshCw class="h-4 w-4 mr-2" />
+          <RefreshCw class="h-4 w-4 mr-1 md:mr-2" />
           Reintentar
         </UButton>
       </UCardContent>

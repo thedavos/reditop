@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { withDefaults, computed } from "vue";
+import { computed } from "vue";
 import { cva, type VariantProps } from "class-variance-authority";
 import { className } from "@/utils/className.util";
 
@@ -23,18 +23,16 @@ const badgeVariants = cva(
 
 type BadgeVariantProps = VariantProps<typeof badgeVariants>;
 
-const props = withDefaults(
-  defineProps<{
-    variant?: BadgeVariantProps["variant"];
-    classes?: string;
-  }>(),
-  {
-    variant: "default",
-  }
-);
+const props = defineProps<{
+  variant?: BadgeVariantProps["variant"];
+  classes?: string;
+}>();
 
 const badgeClasses = computed(() =>
-  className(badgeVariants({ variant: props.variant }), props.classes)
+  className(
+    badgeVariants({ variant: props.variant || "default" }),
+    props.classes || ""
+  )
 );
 </script>
 

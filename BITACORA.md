@@ -1,10 +1,20 @@
-# Bitácora de Tiempo Invertido (Según Historial de Commits Completo)
+# Bitácora de Desarrollo y Análisis de Tiempo: Proyecto `reditop`
 
-Esta bitácora se basa en el análisis del historial de `git log` completo del repositorio, proporcionado por el usuario. El historial consta de 10 commits que detallan la evolución del proyecto `reditop`.
+**Periodo Analizado:** 29 de junio de 2025 - 01 de julio de 2025
+**Fuente de Datos:** Historial completo de `git log` (10 commits)
 
 ## Resumen del Proceso de Desarrollo
 
 El desarrollo del proyecto `reditop` se extendió a lo largo de aproximadamente tres días, desde la madrugada del domingo 29 de junio de 2025 hasta la madrugada del martes 1 de julio de 2025. El proceso muestra una construcción incremental de la aplicación, comenzando con la inicialización del proyecto, seguido por la integración de herramientas y estilos, la implementación de la lógica central de Reddit, la creación de componentes UI y finalmente, la adición de características y mejoras.
+
+
+| Métrica                          | Valor                                                         |
+|:---------------------------------|:--------------------------------------------------------------|
+| **Tiempo Total Transcurrido**    | ~2 días, 1 hora                                               |
+| **Estimación de Trabajo Activo** | **6 - 8 horas**                                               |
+| **Número de Commits**            | ~10                                                           |
+| **Autor Principal**              | davidvargas / David Vargas                                    |
+| **Hitos Clave**                  | Inicialización, Integración API, UI y Paginación, Despliegue. |
 
 ## Detalle de Commits
 
