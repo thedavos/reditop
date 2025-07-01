@@ -170,7 +170,7 @@ const selectPost = (postId: string) => {
         >
           <div class="flex flex-col h-full pt-14 lg:pt-4">
             <div class="flex-1 overflow-y-auto p-4 space-y-3">
-              <div v-if="loading && posts.length > 0" class="text-center py-8">
+              <div v-if="loading" class="text-center py-8">
                 <RefreshCw
                   class="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground"
                 />
