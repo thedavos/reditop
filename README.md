@@ -111,6 +111,87 @@ npm run lint
 yarn lint
 ```
 
+## Decisiones de Diseño y Arquitectura
+
+Esta sección documenta las decisiones técnicas clave y consideraciones arquitecturales que dieron forma a Reditop, proporcionando contexto sobre las elecciones tecnológicas y patrones de diseño implementados.
+
+### Stack Tecnológico y Decisiones Fundamentales
+#### Frontend Framework y Ecosistema
+**Vue.js 2** fue seleccionado como framework principal según los requerimientos del reto técnico para un puesto de Frontend Developer. Esta elección permite demostrar habilidades específicas en el ecosistema Vue 2, incluyendo el manejo de sus particularidades y limitaciones en comparación con Vue 3.
+
+La gestión del estado se implementó con **Pinia**, la solución oficialmente recomendada que ofrece una API intuitiva, excelente integración con TypeScript y mejor experiencia de desarrollo comparada con Vuex. **Vue Router** se integró desde el inicio para establecer una base escalable, anticipando futuras expansiones hacia una aplicación multi-página.
+
+#### Persistencia y Experiencia de Usuario
+
+La persistencia del estado se logra mediante <code>localStorage</code>, almacenando:
+
+- Estado de los posts (cargados, leídos, descartados)
+- Post actualmente seleccionado
+
+Esta decisión mejora significativamente la experiencia del usuario al mantener el contexto entre sesiones de navegación sin requerir infraestructura backend adicional.
+
+#### Arquitectura de Estilos y Responsividad
+
+**Tailwind CSS** fue elegido por su enfoque utility-first que permite:
+
+- Desarrollo ágil de interfaces
+- Consistencia visual a través de un sistema de diseño unificado
+- Optimización automática del CSS final
+- Responsividad nativa con breakpoints predefinidos
+
+### Patrones de Diseño y Organización del Código
+#### Arquitectura de Componentes
+La estructura de componentes sigue un patrón jerárquico bien definido:
+
+**Componentes Base (UI Kit):** `UButton`, `UBadge`, `UCard` - Elementos reutilizables que forman el sistema de diseño básico, manteniendo consistencia visual y comportamental. La creación de estos componentes propios fue necesaria debido a que las principales librerías de componentes UI (como Vuetify, Quasar, Element Plus) han discontinuado el soporte para Vue.js 2, enfocándose exclusivamente en Vue 3.
+
+**Componentes Específicos:** `UPostItem`, `UPostDetail` - Componentes especializados para el dominio de la aplicación, encapsulando lógica de negocio específica.
+
+**Composables para Lógica Compartida:** La lógica compleja, como el manejo de diálogos (`useDialog` para `UImageDialog`), se abstrajo en composables reutilizables, promoviendo la separación de responsabilidades y la testabilidad del código.
+
+#### Tipado Estático y Robustez
+
+**TypeScript** se implementó para:
+
+- Detección temprana de errores en tiempo de desarrollo
+- Mejor IntelliSense y experiencia de desarrollo
+- Documentación implícita del código a través de tipos
+- Facilitar el mantenimiento y refactoring a largo plazo
+
+### Estrategia de Datos y Rendimiento
+
+#### Gestión de Estado y API
+
+La aplicación consume la API pública de Reddit para obtener los posts más populares de r/all, implementando una estrategia híbrida de carga y paginación:
+
+**Carga Inicial:** 50 posts se obtienen en la primera petición para proporcionar contenido inmediato.
+
+**Paginación Cliente-Servidor:** Se usa la paginación del lado del cliente (10 posts por página) sobre datos ya cargados para navegación instantánea
+
+#### Optimizaciones de UX
+
+- **Feedback Inmediato:** Sistema de notificaciones para todas las acciones del usuario
+- **Estados Locales:** Las interacciones (marcar como leído, descartar) se reflejan inmediatamente en la UI
+- **Gestión de Errores:** Manejo robusto de fallos de red con opciones de reintento
+- **Funcionalidades Prácticas:** Descarga de imágenes y gestión de posts descartados
+
+### Consideraciones de Despliegue y Configuración
+
+#### Optimizaciones de Build
+
+La configuración de compilación se optimizó para:
+
+- Compatibilidad con navegadores modernos
+- Seguridad de tipos mejorada
+- Optimización del bundle final
+
+### Infraestructura de Despliegue
+El proyecto está configurado para despliegue en GitHub Pages con dominio personalizado (`reditop.online`), proporcionando:
+
+- Hosting estático eficiente con Github Pages
+- SSL/TLS automático
+- CDN global para mejor rendimiento
+
 ## Bitácora de Tiempo
 
 Para un análisis del tiempo invertido basado en el historial de commits del repositorio, por favor consulta el archivo [BITACORA.md](BITACORA.md).
