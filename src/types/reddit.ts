@@ -53,5 +53,5 @@ export interface RedditStoreState {
   after: string | null;
   loading: boolean;
   error: string | null;
-  isMobile: boolean;
+  isInitialized: boolean;
 }

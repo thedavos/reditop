@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
-import { RefreshCw, Trash2, Menu, X } from "lucide-vue";
+import { RefreshCw, Trash2, Menu, X, RotateCcw } from "lucide-vue";
 import { PortalTarget } from "portal-vue";
+import { useMediaQuery } from "@vueuse/core";
 import { useRedditStore } from "@/stores/reddit.store";
 import UButton from "@/components/UButton.vue";
 import UBadge from "@/components/UBadge.vue";
 import UPostItem from "@/components/posts/UPostItem.vue";
+import UPostDetail from "@/components/posts/UPostDetail.vue";
 import UPagination from "@/components/UPagination.vue";
 import URedditError from "@/components/URedditError.vue";
 import { useNotifications } from "@/composables/useNotifications.composable";
@@ -15,6 +17,7 @@ import type { RedditPost } from "@/types/reddit";
 const isSidebarOpen = ref(false);
 const isDismissingAll = ref(false);
 
+const isMobile = useMediaQuery("(max-width: 768px)");
 const { showInfo } = useNotifications();
 const redditStore = useRedditStore();
 const {
@@ -31,11 +34,16 @@ const {
   currentPage,
 } = storeToRefs(redditStore);
 
-redditStore.loadPosts();
+redditStore.initialize();
 
 const refreshPosts = () => {
   redditStore.loadPosts();
   showInfo("Actualizando", "Cargando las últimas publicaciones...");
+};
+
+const restartPosts = () => {
+  redditStore.resetAndReload();
+  showInfo("Reiniciando", "Reiniciando la lista de publicaciones...");
 };
 
 const dismissAll = () => {
@@ -73,6 +81,10 @@ const selectPost = (postId: string) => {
   redditStore.selectPost(
     posts.value.find((post) => post.id === postId) as RedditPost
   );
+
+  if (isMobile.value) {
+    isSidebarOpen.value = false;
+  }
 };
 </script>
 
@@ -84,7 +96,7 @@ const selectPost = (postId: string) => {
         class="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div class="container flex h-14 items-center justify-between">
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 md:gap-4">
             <UButton
               variant="ghost"
               size="sm"
@@ -100,7 +112,8 @@ const selectPost = (postId: string) => {
               v-if="unreadCount > 0"
               variant="secondary"
               classes="bg-reddit-orange text-white"
-              >{{ unreadCount }} nuevas</UBadge
+              >{{ unreadCount }}
+              <span class="hidden md:inline-block ml-1"> nuevas</span></UBadge
             >
           </div>
 
@@ -109,7 +122,7 @@ const selectPost = (postId: string) => {
               variant="outline"
               size="sm"
               :disabled="loading"
-              @click.native="refreshPosts"
+              @click="refreshPosts"
             >
               <RefreshCw
                 :class="[
@@ -119,7 +132,17 @@ const selectPost = (postId: string) => {
                   },
                 ]"
               />
-              <span class="ml-2 hidden md:block">Actualizar</span>
+              <span class="ml-1 hidden md:block">Actualizar</span>
+            </UButton>
+
+            <UButton
+              variant="outline"
+              size="sm"
+              :disabled="loading"
+              @click="restartPosts"
+            >
+              <RotateCcw class="h4 w-4" />
+              <span class="ml-1 hidden md:block">Reiniciar</span>
             </UButton>
 
             <UButton
@@ -129,7 +152,7 @@ const selectPost = (postId: string) => {
               @click="dismissAll"
             >
               <Trash2 class="h-4 w-4" />
-              <span class="ml-2 hidden md:block">Descartar todo</span>
+              <span class="ml-1 hidden md:block">Descartar todo</span>
             </UButton>
           </div>
         </div>
@@ -138,7 +161,7 @@ const selectPost = (postId: string) => {
       <div class="container flex">
         <aside
           :class="[
-            'fixed inset-y-0 left-0 z-40 w-80 bg-background border-r transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:z-auto',
+            'fixed inset-y-0 left-0 z-40 max-h-screen w-full md:w-80 bg-background border-r transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:z-auto',
             {
               'translate-x-0': isSidebarOpen,
               '-translate-x-full': !isSidebarOpen,
@@ -189,7 +212,13 @@ const selectPost = (postId: string) => {
         </aside>
 
         <main class="flex-1 lg:ml-0">
-          <div class="flex items-center justify-center h-[calc(100vh-3.5rem)]">
+          <div v-if="selectedPost" class="p-4">
+            <UPostDetail :post="selectedPost" @dismiss="dismissPost" />
+          </div>
+          <div
+            v-else
+            class="flex items-center justify-center h-[calc(100vh-3.5rem)]"
+          >
             <div class="text-center space-y-4 max-w-md">
               <div class="text-6xl mb-4">👋</div>
               <h2 class="text-2xl font-bold">¡Bienvenido a Reditop!</h2>

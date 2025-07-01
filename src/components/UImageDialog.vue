@@ -8,34 +8,23 @@ import {
   UDialogFooter,
 } from "@/components/dialog";
 import UButton from "@/components/UButton.vue";
+import { downloadImage } from "@/utils/downloadImage.util";
 
 const props = defineProps<{
   imageUrl: string;
   imageAlt?: string;
   downloadFilename?: string;
+  isBig?: boolean;
 }>();
 
 const isDownloading = ref(false);
 
-const downloadImage = async () => {
+const onDownloadImage = async () => {
   if (isDownloading.value) return;
 
   try {
     isDownloading.value = true;
-
-    const response = await fetch(props.imageUrl);
-    const blob = await response.blob();
-
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = props.downloadFilename || "imagen.jpg";
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(url);
+    await downloadImage(props.imageUrl, props.downloadFilename || "imagen.jpg");
   } catch (error) {
     console.error("Error al descargar la imagen:", error);
   } finally {
@@ -51,7 +40,9 @@ const downloadImage = async () => {
     </UDialogTrigger>
 
     <UDialogContent
-      class="max-w-[95vw] max-h-[30vh] p-0 bg-black/95 border-none"
+      :classes="{
+        'sm:max-w-[95vh]': isBig,
+      }"
       v-slot="{ closeDialog }"
     >
       <div class="flex justify-end" @click="closeDialog">
@@ -75,7 +66,7 @@ const downloadImage = async () => {
           size="sm"
           class="w-full"
           :disabled="isDownloading"
-          @click="downloadImage"
+          @click="onDownloadImage"
         >
           <Download class="h-4 w-4 mr-2" />
           {{ isDownloading ? "Descargando..." : "Descargar" }}

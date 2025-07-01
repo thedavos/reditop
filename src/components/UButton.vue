@@ -38,12 +38,14 @@ interface ButtonProps {
   variant?: BaseVariantProps["variant"];
   size?: BaseVariantProps["size"];
   asChild?: boolean;
+  classes?: string;
 }
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   asChild: false,
   variant: "default",
   size: "default",
+  classes: "",
 });
 
 const listeners = useListeners();
@@ -53,7 +55,8 @@ const buttonClass = computed(() => {
     buttonVariants({
       variant: props.variant,
       size: props.size,
-    })
+    }),
+    props.classes
   );
 });
 

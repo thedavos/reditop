@@ -8,6 +8,7 @@ import UImageDialog from "@/components/UImageDialog.vue";
 import { formatRelativeTime } from "@/utils/date.util";
 import { formatNumber } from "@/utils/formatNumber.util";
 import { getThumbnailUrl } from "@/utils/thumbnail.util";
+import { getImageUrl } from "@/utils/imageUrl.util";
 import type { PostState, RedditPost } from "@/types/reddit";
 
 interface PostItemProps {
@@ -24,22 +25,7 @@ const isImageBroken = ref(false);
 const isRead = computed(() => !!props.postState?.isRead);
 const thumbnail = computed(() => getThumbnailUrl(props.post));
 
-const fullImageUrl = computed(() => {
-  if (
-    props.post.url &&
-    (props.post.url.includes(".jpg") ||
-      props.post.url.includes(".png") ||
-      props.post.url.includes(".gif"))
-  ) {
-    return props.post.url;
-  }
-
-  if (props.post.preview?.images?.[0]?.source?.url) {
-    return props.post.preview.images[0].source.url.replace(/&amp;/g, "&");
-  }
-
-  return "";
-});
+const fullImageUrl = computed(() => getImageUrl(props.post));
 
 const imageAlt = computed(() => {
   return props.post.title || "Imagen del post";
@@ -106,10 +92,10 @@ const onDismiss = (e: Event) => {
           <UButton
             variant="ghost"
             size="sm"
-            class="flex-shrink-0 h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+            classes="flex-shrink-0 w-6 h-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
             @click="onDismiss"
           >
-            <X class="h-3 w-3" />
+            <X class="w-3 h-3" />
           </UButton>
         </div>
 

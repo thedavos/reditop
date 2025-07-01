@@ -5,7 +5,7 @@ import { className } from "@/utils/className.util";
 import { useDialogContext, useDialog } from "@/components/dialog/useDialog";
 
 const props = defineProps<{
-  classes?: string;
+  classes?: string | object;
 }>();
 
 useDialog();

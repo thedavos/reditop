@@ -1,21 +1,35 @@
 import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
 import type { PostState, RedditPost, RedditStoreState } from "@/types/reddit";
 import { RedditService } from "@/services/reddit.api";
 
 const STORAGE_KEY = "reddit-client-state";
 const POSTS_PER_PAGE = 10;
 
+const defaultStoredState = {
+  posts: [] as RedditPost[],
+  postStates: {} as Record<string, PostState>,
+  selectedPost: null as RedditPost | null,
+  after: null as string | null,
+};
+
+const storedState = useLocalStorage(STORAGE_KEY, defaultStoredState);
+
 export const useRedditStore = defineStore("reddit", {
-  state: (): RedditStoreState => ({
-    posts: [],
-    postStates: {},
-    selectedPost: null,
-    currentPage: 1,
-    after: null,
-    error: null,
-    loading: false,
-    isMobile: false,
-  }),
+  state: (): RedditStoreState => {
+    const hasStoredData = storedState.value.posts.length > 0;
+
+    return {
+      posts: hasStoredData ? storedState.value.posts : [],
+      postStates: hasStoredData ? storedState.value.postStates : {},
+      selectedPost: hasStoredData ? storedState.value.selectedPost : null,
+      currentPage: 1,
+      after: hasStoredData ? storedState.value.after : null,
+      error: null,
+      loading: false,
+      isInitialized: hasStoredData,
+    };
+  },
 
   getters: {
     visiblePosts(): RedditPost[] {
@@ -67,12 +81,46 @@ export const useRedditStore = defineStore("reddit", {
   },
 
   actions: {
+    syncWithStorage() {
+      storedState.value = {
+        posts: this.posts,
+        postStates: this.postStates,
+        selectedPost: this.selectedPost,
+        after: this.after,
+      };
+    },
+
+    loadFromStorage() {
+      if (storedState.value.posts.length > 0) {
+        this.$patch({
+          posts: storedState.value.posts,
+          postStates: storedState.value.postStates,
+          selectedPost: storedState.value.selectedPost,
+          after: storedState.value.after,
+          isInitialized: true,
+        });
+      }
+    },
+
+    async initialize() {
+      if (!this.isInitialized) {
+        this.loadFromStorage();
+
+        // Si no hay datos en localStorage, cargar desde API
+        if (!this.isInitialized) {
+          await this.loadPosts();
+        }
+      }
+    },
+
     setPosts(posts: RedditPost[]) {
       this.posts = posts;
+      this.syncWithStorage();
     },
 
     addPosts(posts: RedditPost[]) {
       this.posts = [...this.posts, ...posts];
+      this.syncWithStorage();
     },
 
     setPostState(postId: string, stateUpdate: Partial<PostState>) {
@@ -92,14 +140,17 @@ export const useRedditStore = defineStore("reddit", {
       };
 
       this.postStates = updatedPostStates;
+      this.syncWithStorage();
     },
 
     setSelectedPost(post: RedditPost | null) {
       this.selectedPost = post;
+      this.syncWithStorage();
     },
 
     setAfter(after: string | null) {
       this.after = after;
+      this.syncWithStorage();
     },
 
     setLoading(loading: boolean) {
@@ -114,10 +165,6 @@ export const useRedditStore = defineStore("reddit", {
       this.currentPage = page;
     },
 
-    setIsMobile(isMobile: boolean) {
-      this.isMobile = isMobile;
-    },
-
     initializePostStates(posts: RedditPost[]) {
       posts.forEach((post) => {
         if (!this.postStates[post.id]) {
@@ -128,6 +175,7 @@ export const useRedditStore = defineStore("reddit", {
           };
         }
       });
+      this.syncWithStorage();
     },
 
     dismissAllPosts(posts: RedditPost[]) {
@@ -150,13 +198,7 @@ export const useRedditStore = defineStore("reddit", {
 
       this.postStates = updatedPostStates;
       this.selectedPost = null;
-    },
-
-    loadStoredState(savedState: RedditStoreState) {
-      if (savedState.posts) this.posts = savedState.posts;
-      if (savedState.postStates) this.postStates = savedState.postStates;
-      if (savedState.selectedPost) this.selectedPost = savedState.selectedPost;
-      if (savedState.after) this.after = savedState.after;
+      this.syncWithStorage();
     },
 
     async loadPosts({ loadMore = false } = {}) {
@@ -180,7 +222,7 @@ export const useRedditStore = defineStore("reddit", {
 
         this.setAfter(response.data.after);
         this.initializePostStates(posts);
-        this.saveState();
+        this.isInitialized = true;
       } catch (error) {
         this.setError("Failed to load posts. Please try again.");
         console.error("Error loading posts:", error);
@@ -191,20 +233,10 @@ export const useRedditStore = defineStore("reddit", {
 
     markAsRead(postId: string) {
       this.setPostState(postId, { isRead: true });
-      this.saveState();
     },
 
     markAsDismissing(postId: string) {
       this.setPostState(postId, { isDismissing: true });
-      this.saveState();
-    },
-
-    toggleRead(postId: string) {
-      const currentState = this.postStates[postId];
-      const isRead = currentState ? currentState.isRead : false;
-
-      this.setPostState(postId, { isRead: !isRead });
-      this.saveState();
     },
 
     dismissPost(postId: string) {
@@ -213,13 +245,10 @@ export const useRedditStore = defineStore("reddit", {
       if (this.selectedPost?.id === postId) {
         this.setSelectedPost(null);
       }
-
-      this.saveState();
     },
 
     dismissAll() {
       this.dismissAllPosts(this.visiblePosts);
-      this.saveState();
     },
 
     selectPost(post: RedditPost) {
@@ -227,26 +256,20 @@ export const useRedditStore = defineStore("reddit", {
       this.markAsRead(post.id);
     },
 
-    saveState() {
-      const stateToSave = {
-        posts: this.posts,
-        postStates: this.postStates,
-        selectedPost: this.selectedPost,
-        after: this.after,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    resetStore() {
+      this.posts = [];
+      this.postStates = {};
+      this.selectedPost = null;
+      this.currentPage = 1;
+      this.after = null;
+      this.error = null;
+      this.loading = false;
+      this.syncWithStorage();
     },
 
-    loadState() {
-      try {
-        const savedState = localStorage.getItem(STORAGE_KEY);
-        if (savedState) {
-          const parsedState = JSON.parse(savedState);
-          this.loadStoredState(parsedState);
-        }
-      } catch (error) {
-        console.error("Error loading state:", error);
-      }
+    async resetAndReload() {
+      this.resetStore();
+      await this.loadPosts();
     },
   },
 });

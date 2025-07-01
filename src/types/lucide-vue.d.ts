@@ -13,6 +13,9 @@ declare module "lucide-vue" {
   export const MessageSquare: Component;
   export const ImageOff: Component;
   export const Download: Component;
+  export const Loader2: Component;
+  export const ExternalLink: Component;
+  export const RotateCcw: Component;
 
   const lucide: Record<string, Component>;
   export default lucide;
