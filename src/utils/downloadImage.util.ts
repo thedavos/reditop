@@ -1,6 +1,8 @@
+import { CORS_PROXY } from "@/services/reddit.api";
+
 export const downloadImage = async (imageUrl: string, filename: string) => {
   try {
-    const response = await fetch(imageUrl, { mode: "cors" });
+    const response = await fetch(`${CORS_PROXY}/${imageUrl}`, { mode: "cors" });
     const blob = await response.blob();
 
     const url = window.URL.createObjectURL(blob);

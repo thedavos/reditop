@@ -1,7 +1,8 @@
 import type { RedditApiResponse } from "@/types/reddit";
 import axios from "axios";
 
-const REDDIT_API_BASE = "https://cors-anywhere.com/https://api.reddit.com";
+export const CORS_PROXY = "https://cors-anywhere.com";
+export const REDDIT_API_BASE = `${CORS_PROXY}/https://cors-anywhere.com/https://api.reddit.com`;
 
 export class RedditService {
   static async getTopPosts(
