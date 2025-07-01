@@ -141,7 +141,14 @@ const selectPost = (postId: string) => {
               :disabled="loading"
               @click="restartPosts"
             >
-              <RotateCcw class="h4 w-4" />
+              <RotateCcw
+                :class="[
+                  'h-4 w-4',
+                  {
+                    'animate-spin': loading,
+                  },
+                ]"
+              />
               <span class="ml-1 hidden md:block">Reiniciar</span>
             </UButton>
 
