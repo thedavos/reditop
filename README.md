@@ -2,7 +2,7 @@
 
 Reditop es una aplicación web diseñada para explorar los posts más populares del subreddit `r/all` de Reddit. Permite a los usuarios visualizar, interactuar y gestionar una lista de posts de forma sencilla e intuitiva.
 
-**🚀 Puedes visitar la aplicación desplegada en: [https://reditop.online/]([https://reditop.online/](https://thedavos.github.io/reditop/))**
+**🚀 Puedes visitar la aplicación desplegada en: [https://reditop.online/]([https://thedavos.github.io/reditop/])**
 
 ## Características Principales
 
