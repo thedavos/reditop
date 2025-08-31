@@ -1,4 +1,4 @@
-name: NodeJS with Grunt
+name: NodeJS with Vite
 
 on:
   push:
@@ -26,4 +26,4 @@ jobs:
     - name: Build
       run: |
         npm install
-        grunt
+        npm run build
